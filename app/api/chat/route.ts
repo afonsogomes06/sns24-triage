@@ -14,6 +14,15 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify(body),
   });
 
-  const data = await response.json();
-  return NextResponse.json(data, { status: response.status });
+  const text = await response.text();
+  if (!text) {
+    return NextResponse.json({ error: 'Empty response from server' }, { status: 502 });
+  }
+
+  try {
+    const data = JSON.parse(text);
+    return NextResponse.json(data, { status: response.status });
+  } catch {
+    return NextResponse.json({ error: 'Invalid response from server', raw: text }, { status: 502 });
+  }
 }
